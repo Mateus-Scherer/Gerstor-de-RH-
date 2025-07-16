@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sistema RHControl</title>
+<style>
+  /* Reset básico */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #333;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+
+  h1 {
+    color: white;
+    margin-bottom: 30px;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  }
+
+  /* Interface inicial */
+  #home {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 360px;
+    width: 100%;
+  }
+  #home button {
+    background-color: #f6f8ff;
+    color: #5a4d9d;
+    font-weight: 700;
+    font-size: 1.2rem;
+    padding: 14px 0;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(90, 77, 157, 0.3);
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  #home button:hover {
+    background-color: #5a4d9d;
+    color: white;
+    box-shadow: 0 6px 12px rgba(90, 77, 157, 0.6);
+  }
+
+  /* Conteúdo principal */
+  .tab-content {
+    background: white;
+    padding: 24px 32px;
+    border-radius: 12px;
+    max-width: 720px;
+    width: 100%;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    display: none;
+    margin-top: 30px;
+  }
+  .tab-content.active {
+    display: block;
+  }
+
+  h2 {
+    color: #5a4d9d;
+    margin-bottom: 20px;
+  }
+
+  label {
+    display: block;
+    margin-top: 16px;
+    font-weight: 600;
+    color: #4b3f8c;
+  }
+
+  input[type="text"],
+  input[type="number"] {
+    padding: 10px;
+    width: 100%;
+    max-width: 320px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    margin-top: 6px;
+    font-size: 1rem;
+    transition: border-color 0.25s ease;
+  }
+  input[type="text"]:focus,
+  input[type="number"]:focus {
+    border-color: #5a4d9d;
+    outline: none;
+  }
+
+  button.action-btn {
+    margin-top: 24px;
+    background-color: #5a4d9d;
+    color: white;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 28px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  button.action-btn:hover {
+    background-color: #423576;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    font-size: 0.95rem;
+  }
+  th, td {
+    border: 1px solid #aaa;
+    padding: 12px 14px;
+    text-align: left;
+  }
+  th {
+    background-color: #f2f2ff;
+    color: #5a4d9d;
+  }
+  tr:nth-child(even) {
+    background-color: #fafaff;
+  }
+
+  .message {
+    margin-top: 18px;
+    font-weight: 600;
+    color: green;
+  }
+
+  .ajustar-input {
+    width: 100px;
+    padding: 6px;
+    font-size: 1rem;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    transition: border-color 0.25s ease;
+  }
+  .ajustar-input:focus {
+    border-color: #5a4d9d;
+    outline: none;
+  }
+
+  /* Botão excluir */
+  button.delete-btn {
+    background-color: #e14c4c;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background-color 0.3s ease;
+  }
+  button.delete-btn:hover {
+    background-color: #a63939;
+  }
+
+  /* Botão reajustar */
+  button.reajustar-btn {
+    background-color: #5a4d9d;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background-color 0.3s ease;
+  }
+  button.reajustar-btn:hover {
+    background-color: #423576;
+  }
+
+  /* Botão voltar */
+  button.voltar-btn {
+    margin-top: 30px;
+    background-color: #888;
+    color: white;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 24px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  button.voltar-btn:hover {
+    background-color: #555;
+  }
+
+  /* Responsividade */
+  @media (max-width: 720px) {
+    .tab-content {
+      padding: 20px 16px;
+    }
+    input[type="text"],
+    input[type="number"] {
+      max-width: 100%;
+    }
+    #home {
+      max-width: 100%;
+    }
+  }
+</style>
+</head>
+<body>
+
+<h1>Sistema RHControl</h1>
+
+<!-- Tela inicial -->
+<div id="home">
+  <button onclick="showTab('cadastrar')">Cadastrar Funcionário</button>
+  <button onclick="showTab('lista')">Lista de Funcionários</button>
+  <button onclick="showTab('reajustar')">Reajustar Salário</button>
+  <button onclick="showTab('excluir')">Excluir Funcionário</button>
+</div>
+
+<!-- Conteúdos -->
+<div id="cadastrar" class="tab-content">
+  <h2>Cadastrar Funcionário</h2>
+  <form id="formCadastrar" onsubmit="event.preventDefault(); cadastrarFuncionario();">
+    <label for="nome">Nome:</label>
+    <input type="text" id="nome" required />
+
+    <label for="cargo">Cargo:</label>
+    <input type="text" id="cargo" required />
+
+    <label for="salario">Salário (R$):</label>
+    <input type="number" id="salario" min="0" step="0.01" required />
+
+    <button type="submit" class="action-btn">Cadastrar</button>
+  </form>
+  <div id="msgCadastrar" class="message"></div>
+  <button class="voltar-btn" onclick="voltarMenu()">Voltar ao Menu Principal</button>
+</div>
+
+<div id="lista" class="tab-content">
+  <h2>Lista de Funcionários</h2>
+  <table id="tabelaFuncionariosLista">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Cargo</th>
+        <th>Salário (R$)</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <button class="voltar-btn" onclick="voltarMenu()">Voltar ao Menu Principal</button>
+</div>
+
+<div id="reajustar" class="tab-content">
+  <h2>Reajustar Salário</h2>
+  <table id="tabelaFuncionariosReajustar">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Cargo</th>
+        <th>Salário Atual (R$)</th>
+        <th>Reajustar Para (R$)</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <div id="msgReajustar" class="message"></div>
+  <button class="voltar-btn" onclick="voltarMenu()">Voltar ao Menu Principal</button>
+</div>
+
+<div id="excluir" class="tab-content">
+  <h2>Excluir Funcionário</h2>
+  <table id="tabelaFuncionariosExcluir">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Cargo</th>
+        <th>Salário (R$)</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <div id="msgExcluir" class="message"></div>
+  <button class="voltar-btn" onclick="voltarMenu()">Voltar ao Menu Principal</button>
+</div>
+
+<script>
+  const funcionarios = [];
+
+  // Inicialmente mostra só o home
+  document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+  document.getElementById('home').style.display = 'flex';
+
+  function showTab(tabId) {
+    // Esconder home e todas abas
+    document.getElementById('home').style.display = 'none';
+    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+
+    // Mostrar aba selecionada
+    const tab = document.getElementById(tabId);
+    tab.style.display = 'block';
+
+    // Atualizar tabelas conforme aba
+    if (tabId === 'lista') atualizarTabelaLista();
+    else if (tabId === 'reajustar') {
+      atualizarTabelaReajustar();
+      document.getElementById('msgReajustar').textContent = '';
+    }
+    else if (tabId === 'excluir') {
+      atualizarTabelaExcluir();
+      document.getElementById('msgExcluir').textContent = '';
+    }
+    else if (tabId === 'cadastrar') {
+      document.getElementById('msgCadastrar').textContent = '';
+      document.getElementById('formCadastrar').reset();
+    }
+  }
+
+  function voltarMenu() {
+    // Esconder todas abas e mostrar home
+    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+    document.getElementById('home').style.display = 'flex';
+  }
+
+  function cadastrarFuncionario() {
+    const nomeInput = document.getElementById('nome');
+    const cargoInput = document.getElementById('cargo');
+    const salarioInput = document.getElementById('salario');
+    const msg = document.getElementById('msgCadastrar');
+
+    const nome = nomeInput.value.trim();
+    const cargo = cargoInput.value.trim();
+    const salario = parseFloat(salarioInput.value);
+
+    if (!nome) {
+      msg.style.color = 'red';
+      msg.textContent = 'Informe o nome do funcionário.';
+      return;
+    }
+    if (!cargo) {
+      msg.style.color = 'red';
+      msg.textContent = 'Informe o cargo do funcionário.';
+      return;
+    }
+    if (isNaN(salario) || salario < 0) {
+      msg.style.color = 'red';
+      msg.textContent = 'Informe um salário válido.';
+      return;
+    }
+
+    funcionarios.push({ nome, cargo, salario });
+    msg.style.color = 'green';
+    msg.textContent = `Funcionário "${nome}" cadastrado com sucesso!`;
+
+    nomeInput.value = '';
+    cargoInput.value = '';
+    salarioInput.value = '';
+  }
+
+  function atualizarTabelaLista() {
+    const tbody = document.querySelector('#tabelaFuncionariosLista tbody');
+    tbody.innerHTML = '';
+    if (funcionarios.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="3">Nenhum funcionário cadastrado.</td></tr>`;
+      return;
+    }
+    funcionarios.forEach(func => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${func.nome}</td>
+        <td>${func.cargo}</td>
+        <td>${func.salario.toFixed(2)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function atualizarTabelaReajustar() {
+    const tbody = document.querySelector('#tabelaFuncionariosReajustar tbody');
+    tbody.innerHTML = '';
+    if (funcionarios.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5">Nenhum funcionário cadastrado.</td></tr>`;
+      return;
+    }
+    funcionarios.forEach((func, idx) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${func.nome}</td>
+        <td>${func.cargo}</td>
+        <td>${func.salario.toFixed(2)}</td>
+        <td><input class="ajustar-input" type="number" min="0" step="0.01" value="${func.salario.toFixed(2)}" id="novoSalario${idx}"></td>
+        <td><button class="reajustar-btn" onclick="reajustarSalario(${idx})">Reajustar</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function reajustarSalario(idx) {
+    const input = document.getElementById(`novoSalario${idx}`);
+    const novoSal = parseFloat(input.value);
+    const msg = document.getElementById('msgReajustar');
+
+    if (isNaN(novoSal) || novoSal < 0) {
+      msg.style.color = 'red';
+      msg.textContent = 'Informe um valor válido para o salário.';
+      return;
+    }
+
+    funcionarios[idx].salario = novoSal;
+    msg.style.color = 'green';
+    msg.textContent = `Salário do funcionário "${funcionarios[idx].nome}" reajustado para R$ ${novoSal.toFixed(2)}.`;
+
+    atualizarTabelaReajustar();
+  }
+
+  function atualizarTabelaExcluir() {
+    const tbody = document.querySelector('#tabelaFuncionariosExcluir tbody');
+    tbody.innerHTML = '';
+    if (funcionarios.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4">Nenhum funcionário cadastrado.</td></tr>`;
+      return;
+    }
+    funcionarios.forEach((func, idx) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${func.nome}</td>
+        <td>${func.cargo}</td>
+        <td>${func.salario.toFixed(2)}</td>
+        <td><button class="delete-btn" onclick="excluirFuncionario(${idx})">Excluir</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function excluirFuncionario(idx) {
+    const nome = funcionarios[idx].nome;
+    funcionarios.splice(idx, 1);
+    const msg = document.getElementById('msgExcluir');
+    msg.style.color = 'green';
+    msg.textContent = `Funcionário "${nome}" deletado com sucesso!`;
+    atualizarTabelaExcluir();
+  }
+</script>
+
+</body>
+</html>

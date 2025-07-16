@@ -1,0 +1,116 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RHControl - Ação</title>
+  <style>
+    body { font-family: Arial; margin: 30px; }
+    h2 { color: #2c3e50; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #e74c3c; color: white; }
+    input, button { margin: 5px 0; padding: 8px; width: 100%; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <h2 id="titulo"></h2>
+  <div id="conteudo"></div>
+  <button onclick="voltar()">Voltar ao Menu</button>
+
+  <script>
+    const api = "http://localhost:4567/funcionarios";
+    const acao = sessionStorage.getItem("acao");
+    document.getElementById("titulo").textContent = acao === "cadastrar" ? "Cadastrar Funcionário" :
+                                                    acao === "listar" ? "Lista de Funcionários" :
+                                                    acao === "reajustar" ? "Reajustar Salário" :
+                                                    acao === "excluir" ? "Excluir Funcionário" : "";
+
+    const conteudo = document.getElementById("conteudo");
+
+    if (acao === "cadastrar") {
+      conteudo.innerHTML = `
+        <input id="nome" placeholder="Nome" required />
+        <input id="cargo" placeholder="Cargo" required />
+        <input id="email" placeholder="Email" required />
+        <input id="salario" placeholder="Salário" type="number" required />
+        <button onclick="cadastrar()">Salvar</button>
+        <p id="msg" style="color: green;"></p>
+      `;
+    } else if (acao === "listar") {
+      listar();
+    } else if (acao === "reajustar") {
+      conteudo.innerHTML = `
+        <input id="percentual" placeholder="Percentual de reajuste (%)" type="number" />
+        <button onclick="reajustar()">Aplicar Reajuste</button>
+        <p>Simulação visual. Salário real só muda se ajustado no back-end.</p>
+      `;
+    } else if (acao === "excluir") {
+      listar(true);
+    } else {
+      conteudo.innerHTML = "<p>Saindo do sistema...</p>";
+    }
+
+    async function listar(excluir = false) {
+      const res = await fetch(api);
+      const dados = await res.json();
+      let html = `<table><tr><th>ID</th><th>Nome</th><th>Cargo</th><th>Email</th><th>Salário</th>`;
+      if (excluir) html += "<th>Ação</th>";
+      html += "</tr>";
+      dados.forEach(f => {
+        html += `<tr>
+          <td>${f.id}</td><td>${f.nome}</td><td>${f.cargo}</td><td>${f.email}</td><td>R$ ${f.salario}</td>`;
+        if (excluir) {
+          html += `<td><button onclick="deletar(${f.id})">Excluir</button></td>`;
+        }
+        html += "</tr>";
+      });
+      html += "</table><p id='msg'></p>";
+      conteudo.innerHTML = html;
+    }
+
+    async function cadastrar() {
+      const nome = document.getElementById("nome").value.trim();
+      const cargo = document.getElementById("cargo").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const salario = parseFloat(document.getElementById("salario").value);
+
+      if (!nome || !cargo || !email || isNaN(salario)) {
+        alert("Preencha todos os campos corretamente!");
+        return;
+      }
+
+      const funcionario = { nome, cargo, email, salario };
+
+      await fetch(api, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(funcionario)
+      });
+
+      document.getElementById("msg").textContent = "Funcionário cadastrado com sucesso!";
+      document.getElementById("nome").value = "";
+      document.getElementById("cargo").value = "";
+      document.getElementById("email").value = "";
+      document.getElementById("salario").value = "";
+    }
+
+    async function deletar(id) {
+      await fetch(api + "/" + id, { method: "DELETE" });
+      document.getElementById("msg").textContent = "Funcionário deletado com sucesso!";
+      listar(true);
+    }
+
+    function reajustar() {
+      const percentual = parseFloat(document.getElementById("percentual").value);
+      alert("Reajuste simulado de " + percentual + "% aplicado com sucesso!");
+    }
+
+    function voltar() {
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>
